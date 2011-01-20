@@ -25,19 +25,24 @@ var inCreatedDirectory = function(dicts, callback) {
   createDirRecursiv(dicts, "", callback);
 }
 
+var splittedUuid = function(uuid) {
+  var compact_uuid = uuid.replace(/[-\/]/g, "");
+  return [compact_uuid.slice(0, 6), compact_uuid.slice(6)];
+}
+
+
 var saveToFile = function(req, res) {
   var writeStream, buffer;
   var ended = false;
   
   var uuid = url.parse(req.url).pathname;
-  var compact_uuid = uuid.replace(/[-\/]/g, "");
   
   var endHeader = function() {
       res.writeHead(200, {'Content-Type': 'text/plain'});
       res.end('Hello World\n');
   }
   
-  inCreatedDirectory([compact_uuid.slice(0, 6), compact_uuid.slice(6)], function(path) {
+  inCreatedDirectory(splittedUuid(uuid), function(path) {
     var writeStream = fs.createWriteStream(path + "data");
     writeStream.write(buffer);
     
@@ -48,7 +53,6 @@ var saveToFile = function(req, res) {
   });
   
   req.on('data', function(chunk) {
-    console.log(chunk);
     if (writeStream) {
       writeStream.write(chunk);
     } else {
@@ -65,10 +69,28 @@ var saveToFile = function(req, res) {
   });  
 }
 
+var loadFile = function(req, res) {
+  var uuid = url.parse(req.url).pathname;
+  
+  var path = splittedUuid(uuid).concat(["data"]).join("/");
+  var readStream = fs.createReadStream(path);
+  readStream.on('data', function(data) {
+    console.log(data);
+  });
+  readStream.on('end', function() {
+    console.log("end");
+  });
+  
+  
+}
+
+
 
 http.createServer(function (req, res) {
   if (req.method == "PUT") {
     saveToFile(req, res);
+  } else if (req.method == "GET") {
+    loadFile(req, res);
   }
 }).listen(8124, "0.0.0.0");
 

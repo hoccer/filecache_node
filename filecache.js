@@ -11,16 +11,33 @@ var nStore = require('nstore'),
 
 var File = function(path) {
   events.EventEmitter.call(this);
-  that = this;
+  this.path = path;
   
+  that = this;
   fs.stat(path, function(err, data) {
     that.exists = !err;
+    that.stat = data;
     that.emit('ready', that);
   });
-  
 }
 
 sys.inherits(File, events.EventEmitter);
+
+File.prototype.streamTo = function(res) {
+  if (!this.exists) throw new Error("File " + this.path + " does not exists");
+  
+  var readStream = fs.createReadStream(this.path);
+  
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  
+  readStream.on('data', function(data) {
+    res.write(data)
+  });
+  
+  readStream.on('end', function() {
+    res.end();
+  });
+}
 
 
 var inCreatedDirectory = function(dicts, callback) {
@@ -92,43 +109,19 @@ var saveToFile = function(req, res, next) {
   });  
 }
 
-// var loadFile = function(req, res, next) {
-//   var uuid = req.params.uuid;
-//   
-//   files.get(uuid, function(err, doc, key) {
-//     if (err || doc["expires_in"] === undefined) {};
-//         
-//     var path = splittedUuid(uuid).concat(["data"]).join("/");
-//     var readStream = fs.createReadStream(path);
-// 
-//     res.writeHead(200, {'Content-Type': 'text/plain'});
-// 
-//     readStream.on('data', function(data) {
-//       res.write(data)
-//     });
-// 
-//     readStream.on('end', function() {
-//       res.end();
-//     });
-//   });
-// }
-
 var loadFile = function(req, res, next) {
   var path = splittedUuid(req.params.uuid).concat(["data"]).join("/");
   
   var file = new File(path);
   file.on('ready', function(_file) {
     if (_file.exists) {
-      res.writeHead(200);
-      res.end("found shit");
+      _file.streamTo(res);
     } else {
       res.writeHead(404);
       res.end("file not found");
     }
   });
 }
-
-
 
 function fileCache(app) {
   app.get('/:uuid', loadFile);

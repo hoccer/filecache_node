@@ -9,7 +9,9 @@ var nStore = require('nstore'),
 
 
 
-var File = function(path) {
+var File = function(uuid) {
+  var path = splittedUuid(uuid).concat(["data"]).join("/");
+  
   events.EventEmitter.call(this);
   this.path = path;
   
@@ -18,6 +20,10 @@ var File = function(path) {
     that.exists = !err;
     that.stat = data;
     that.emit('ready', that);
+  });
+  
+  nStore.get(uuid, function(err, doc, meta) {
+    console.log(sys.inspect(doc));
   });
 }
 
@@ -110,9 +116,8 @@ var saveToFile = function(req, res, next) {
 }
 
 var loadFile = function(req, res, next) {
-  var path = splittedUuid(req.params.uuid).concat(["data"]).join("/");
   
-  var file = new File(path);
+  var file = new File(req.params.uuid);
   file.on('ready', function(_file) {
     if (_file.exists) {
       _file.streamTo(res);

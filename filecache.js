@@ -120,7 +120,7 @@ var saveToFile = function(req, res, next) {
   }
   
   var options = { 
-    "expires_at": new Date().getTime() / 1000 + (parseInt(req.params["expires_in"]) || 7),
+    "expires_at": new Date().getTime() / 1000 + (parseInt(req.params["expires_in"]) || 120),
     "size": parseInt(req.headers["content-length"]),
     "type": req.headers["content-type"],
     "content-disposition": req.headers['content-disposition']
@@ -159,11 +159,14 @@ var loadFile = function(req, res, next) {
   console.log("loadFile");
   var file = new File(req.params.uuid);
   file.on('ready', function(_file) {
-    if (_file.doesExists() && !_file.expired()) {
-      _file.streamTo(res);
-    } else {
+    if (!_file.doesExists()) {
       res.writeHead(404);
       res.end("file not found");
+    } else if (_file.expired()) {
+      res.writeHead(404);
+      res.end("file expired");
+    } else {
+        _file.streamTo(res);
     }
   });
 }

@@ -96,6 +96,6 @@ var files = nStore.new('data/files', function() {
     connect.router(fileCache)
   ).listen(9876);
   
-  console.log('Server running at http://127.0.0.1:9876/');
+  console.log('Server running at http://127.0.0.1:9212/');
   started = true;
 });

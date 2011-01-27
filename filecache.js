@@ -17,8 +17,9 @@ var saveToFile = function(req, res, next) {
   
   var endHeader = function() {
       dataStream.end();
-      res.writeHead(201, {'Content-Type': 'text/plain'});
-      res.end('http://localhost:9876/' +  req.params.uuid);
+      var response = 'http://localhost:9212/' +  req.params.uuid;
+      res.writeHead(201, {'Content-Type': 'text/plain', "Content-Length": response.length});
+      res.end(response);
   }
   
   var options = { 
@@ -37,7 +38,7 @@ var saveToFile = function(req, res, next) {
     dataStream.write(buffer);
     
     if (ended) {
-      endHeader();
+      endHeader(); return;
     }
   });
   
@@ -53,7 +54,7 @@ var saveToFile = function(req, res, next) {
   req.on('end', function() {
     ended = true;
     if (dataStream) {
-      endHeader();
+      endHeader(); return;
     } 
   });  
 }

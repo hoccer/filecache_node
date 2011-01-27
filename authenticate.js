@@ -50,17 +50,25 @@ exports.authenticate = function() {
     }
   
     req.startBuffering();
+    
+    var apiResult = req.url.match(/api_key=(.+)&/);
+    if (apiResult.length < 1) {
+      reject("missing api key"); return;
+    }
+    var api_key = decodeURIComponent(apiResult[1].toString());
+        
     db.collection('accounts', function(err, collection) {
-      collection.findOne({"api_key": "37d4b750fc95012d14a7109add515cd4"}, {}, function(err, account) {
+      collection.findOne({"api_key": api_key}, {}, function(err, account) {
         if (!account) {
           reject("account not found"); return;
         } else {
-          var result = req.url.match(/\&signature=(.*)$/);
-          if (result.length < 1) {
+          var sigResult = req.url.match(/\&signature=(.+)$/);
+          if (sigResult.length < 1) {
             reject("missing signature"); return;
           }
-        
-          var signature = decodeURIComponent(result[1].toString());
+          
+          
+          var signature = decodeURIComponent(sigResult[1].toString());
           var url_without_signature = req.url.match(/(.*)\&signature=.*$/)[1];
         
           var calculated_hash = crypto.createHmac('sha1', account.shared_secret)

@@ -44,20 +44,20 @@ exports.authenticate = function() {
   db.open(function(){ console.log("open") });
   
   return function(req, res, next) {
-    var reject = function() {
+    var reject = function(message) {
       res.writeHead(401);
-      res.end("authentification failed");
+      res.end(message || "authentification failed");
     }
   
     req.startBuffering();
     db.collection('accounts', function(err, collection) {
       collection.findOne({"api_key": "37d4b750fc95012d14a7109add515cd4"}, {}, function(err, account) {
         if (!account) {
-          reject(); return;
+          reject("account not found"); return;
         } else {
           var result = req.url.match(/\&signature=(.*)$/);
           if (result.length < 1) {
-            reject(); return;
+            reject("missing signature"); return;
           }
         
           var signature = decodeURIComponent(result[1].toString());
@@ -67,6 +67,7 @@ exports.authenticate = function() {
                                      .update("http://" + req.headers.host + url_without_signature)
                                      .digest('base64');
         
+          console.log(calculated_hash - signature);
           if (signature != calculated_hash)  {
             reject(); return;
           }

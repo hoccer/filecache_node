@@ -44,6 +44,8 @@ exports.authenticate = function() {
   db.open(function(){ console.log("open") });
   
   return function(req, res, next) {
+    console.log(req);
+    
     var reject = function(message) {
       res.writeHead(401);
       res.end(message || "authentification failed");
@@ -73,10 +75,10 @@ exports.authenticate = function() {
           var url_without_signature = req.url.match(/(.*)\&signature=.*$/)[1];
         
           var calculated_hash = crypto.createHmac('sha1', account.shared_secret)
-                                     .update("http://" + req.headers.host + url_without_signature)
+                                     .update("https://" + req.headers.host + url_without_signature)
                                      .digest('base64');
         
-          console.log(calculated_hash + "-" + signature);
+          console.log(calculated_hash + " - " + signature);
           if (signature != calculated_hash)  {
             reject(); return;
           }

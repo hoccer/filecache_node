@@ -76,7 +76,7 @@ exports.authenticate = function() {
                                      .update("http://" + req.headers.host + url_without_signature)
                                      .digest('base64');
         
-          console.log(calculated_hash - signature);
+          console.log(calculated_hash + "-" + signature);
           if (signature != calculated_hash)  {
             reject(); return;
           }

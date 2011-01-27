@@ -16,8 +16,9 @@ var saveToFile = function(req, res, next) {
   var uuid = req.params.uuid;
   
   var endHeader = function() {
+      console.log(req);
       dataStream.end();
-      var response = 'http://localhost:9212/' +  req.params.uuid;
+      var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/' +  req.params.uuid;
       res.writeHead(201, {'Content-Type': 'text/plain', "Content-Length": response.length});
       res.end(response);
   }

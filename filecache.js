@@ -82,9 +82,9 @@ var options = function(req, res, next) {
 }
 
 function fileCache(app) {
-  app.get('/:uuid', loadFile);
-  app.put('/:uuid', saveToFile);
-  app.options('/:uuid', options);
+  app.get('/v3/:uuid', loadFile);
+  app.put('/v3/:uuid', saveToFile);
+  app.options('/v3/:uuid', options);
 }
 
 var started = false;

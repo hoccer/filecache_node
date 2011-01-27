@@ -70,12 +70,11 @@ exports.authenticate = function() {
             reject("missing signature"); return;
           }
           
-          
           var signature = decodeURIComponent(sigResult[1].toString());
           var url_without_signature = req.url.match(/(.*)\&signature=.*$/)[1];
         
           var calculated_hash = crypto.createHmac('sha1', account.shared_secret)
-                                     .update("https://" + req.headers.host + url_without_signature)
+                                     .update(req.headers["x-forwarded-proto"] + "://" + req.headers.host + url_without_signature)
                                      .digest('base64');
         
           console.log(calculated_hash + " - " + signature);

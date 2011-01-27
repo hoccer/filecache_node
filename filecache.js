@@ -75,10 +75,11 @@ var loadFile = function(req, res, next) {
 
 var options = function(req, res, next) {
   res.writeHead(200, {
-    "Access-Control-Allow-Origin": "HTTP_ORIGIN",    
-    "Access-Control-Allow-Methods": "POST, PUT",
+    "Access-Control-Allow-Origin": "*",    
+    "Access-Control-Allow-Methods": "PUT",
     "Access-Control-Allow-Headers": "X-Requested-With, X-File-Name, Content-Type, Content-Disposition"
   });
+  res.end();
 }
 
 function fileCache(app) {

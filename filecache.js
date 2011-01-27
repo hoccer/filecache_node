@@ -16,7 +16,6 @@ var saveToFile = function(req, res, next) {
   var uuid = req.params.uuid;
   
   var endHeader = function() {
-      console.log(req);
       dataStream.end();
       var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
       res.writeHead(201, {'Content-Type': 'text/plain', "Content-Length": response.length});
@@ -44,7 +43,6 @@ var saveToFile = function(req, res, next) {
   });
   
   req.on('data', function(chunk) {
-    console.log("data");
     if (dataStream) {
       dataStream.write(chunk);
     } else {
@@ -94,8 +92,8 @@ var files = nStore.new('data/files', function() {
   if (started) {return;}
   
   connect.createServer(
+  //  auth.authenticate(),
     connect.logger(),
-    auth.authenticate(),
     connect.router(fileCache)
   ).listen(9212);
   

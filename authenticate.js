@@ -54,7 +54,7 @@ exports.authenticate = function() {
     req.startBuffering();
     
     var apiResult = req.url.match(/api_key\=([a-z0-9]+)\&.+$/);
-    if (apiResult.length < 1) {
+    if (!apiResult || apiResult.length < 1) {
       reject("missing api key"); return;
     }
     var api_key = decodeURIComponent(apiResult[1].toString());
@@ -66,7 +66,7 @@ exports.authenticate = function() {
           reject("account not found"); return;
         } else {
           var sigResult = req.url.match(/\&signature=(.+)$/);
-          if (sigResult.length < 1) {
+          if (!sigResult || sigResult.length < 1) {
             reject("missing signature"); return;
           }
           

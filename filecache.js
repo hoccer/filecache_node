@@ -92,6 +92,7 @@ var files = nStore.new('data/files', function() {
   if (started) {return;}
   
   connect.createServer(
+    connect.logger(),
     auth.authenticate(),
     connect.router(fileCache)
   ).listen(9212);

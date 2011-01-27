@@ -56,7 +56,8 @@ exports.authenticate = function() {
       reject("missing api key"); return;
     }
     var api_key = decodeURIComponent(apiResult[1].toString());
-        
+    console.log("api_key " + api_key);
+    
     db.collection('accounts', function(err, collection) {
       collection.findOne({"api_key": api_key}, {}, function(err, account) {
         if (!account) {

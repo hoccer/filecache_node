@@ -51,7 +51,7 @@ exports.authenticate = function() {
   
     req.startBuffering();
     
-    var apiResult = req.url.match(/api_key=(.+)&/);
+    var apiResult = req.url.match(/api_key\=([a-z0-9]+)\&.+$/);
     if (apiResult.length < 1) {
       reject("missing api key"); return;
     }

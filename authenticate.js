@@ -39,7 +39,7 @@ http.IncomingMessage.prototype.stopBuffering = function() {
   this._eventBuffer = null;
 }
 
-exports.authenticate = function() {
+exports.authenticate = function(whitelist) {
   var db = new mongo.Db('hoccer_development', new mongo.Server("127.0.0.1", 27017));
   db.open(function(){ console.log("open") });
   
@@ -47,13 +47,19 @@ exports.authenticate = function() {
     console.log(req);
     
     var reject = function(message) {
+      console.log("reject: " + message)
       res.writeHead(401);
       res.end(message || "authentification failed");
     }
   
+    if (whitelist && whitelist['methods'] && whitelist['methods'].indexOf(req.method) != -1) {
+      next();
+      return;
+    }
+  
     req.startBuffering();
     
-    var apiResult = req.url.match(/api_key\=([a-z0-9]+)\&.+$/);
+    var apiResult = req.url.match(/api_key\=([a-z0-9]+)($|\&.+$)/);
     if (!apiResult || apiResult.length < 1) {
       reject("missing api key"); return;
     }
@@ -65,23 +71,29 @@ exports.authenticate = function() {
         if (!account) {
           reject("account not found"); return;
         } else {
-          var sigResult = req.url.match(/\&signature=(.+)$/);
-          if (!sigResult || sigResult.length < 1) {
-            reject("missing signature"); return;
+          if (req.headers['origin']) {
+            if (account.websites.indexOf(req.headers['origin']) == -1) {
+              reject("api key is not valid for this website"); return;
+            }
+          } else {
+            var sigResult = req.url.match(/\&signature=(.+)$/);
+            if (!sigResult || sigResult.length < 1) {
+              reject("missing signature"); return;
+            }
+
+            var signature = decodeURIComponent(sigResult[1].toString());
+            var url_without_signature = req.url.match(/(.*)\&signature=.*$/)[1];
+
+            var calculated_hash = crypto.createHmac('sha1', account.shared_secret)
+                                       .update(req.headers["x-forwarded-proto"] + "://" + req.headers.host + url_without_signature)
+                                       .digest('base64');
+
+            console.log(calculated_hash + " - " + signature);
+            if (signature != calculated_hash)  {
+              reject(); return;
+            }
           }
           
-          var signature = decodeURIComponent(sigResult[1].toString());
-          var url_without_signature = req.url.match(/(.*)\&signature=.*$/)[1];
-        
-          var calculated_hash = crypto.createHmac('sha1', account.shared_secret)
-                                     .update(req.headers["x-forwarded-proto"] + "://" + req.headers.host + url_without_signature)
-                                     .digest('base64');
-        
-          console.log(calculated_hash + " - " + signature);
-          if (signature != calculated_hash)  {
-            reject(); return;
-          }
-  
           req.stopBuffering();
           next();
         }

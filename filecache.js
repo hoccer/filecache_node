@@ -75,7 +75,7 @@ var loadFile = function(req, res, next) {
 
 var options = function(req, res, next) {
   res.writeHead(200, {
-    "Access-Control-Allow-Origin": "*",    
+    "Access-Control-Allow-Origin": req.headers["origin"],    
     "Access-Control-Allow-Methods": "PUT",
     "Access-Control-Allow-Headers": "X-Requested-With, X-File-Name, Content-Type, Content-Disposition",
     "Content-Length": "0"
@@ -94,8 +94,8 @@ var files = nStore.new('data/files', function() {
   if (started) {return;}
   
   connect.createServer(
-  //  auth.authenticate(),
     connect.logger(),
+    auth.authenticate({methods: 'GET'}),
     connect.router(fileCache)
   ).listen(9212);
   

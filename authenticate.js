@@ -15,26 +15,32 @@ function toArray(obj) {
 
 http.IncomingMessage.prototype.startBuffering = function() {
   this._eventBuffer = [];
-  this.on('data', function() {
+  
+  this._onData = function() {
     this._eventBuffer.push(['data'].concat(toArray(arguments)));
-  });
-  this.on('end', function() {
+  };
+  
+  this._onEnd = function() {
     this._eventBuffer.push(['end'].concat(toArray(arguments)));
-  })  
+  }
+  
+  this.on('data', this._onData);
+  this.on('end', this._onEnd);  
 }
 
 http.IncomingMessage.prototype.stopBuffering = function() {
   that = this;
-  this.removeAllListeners('data');
-  this.removeAllListeners('end');
 
   setTimeout(function(array) {
     return function() {
+      that.removeListeners('data', this._onData);
+      that.removeListeners('end', this._onEnd);
+      
       for (var i = 0; i < array.length; i++) {
         that.emit.apply(that, array[i]);
       }
     }    
-  }(this._eventBuffer), 1);
+  }(this._eventBuffer), 20);
 
   this._eventBuffer = null;
 }

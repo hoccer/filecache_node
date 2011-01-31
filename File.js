@@ -47,7 +47,8 @@ File.prototype.streamTo = function(res) {
 
   res.writeHead(200, {
     'Content-Type': that.options.type,
-    'Content-Disposition': that.options["content-disposition"]
+    'Content-Disposition': that.options["content-disposition"],
+    'Content-Length': that.options['content-length']
   });
   
 

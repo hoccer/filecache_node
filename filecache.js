@@ -9,6 +9,10 @@ var nStore = require('nstore'),
 var       auth = require('./authenticate'),
     fileReader = require('./File'),
          utils = require('./utils');
+         
+var opts = require('tav').set();
+console.log(opts, opts.args);
+
 
 var saveToFile = function(req, res, next) {
   var dataStream, ended = false;
@@ -97,8 +101,8 @@ var files = nStore.new('data/files', function() {
     connect.logger(),
     auth.authenticate({methods: 'GET'}),
     connect.router(fileCache)
-  ).listen(9212);
+  ).listen(opts["port"]);
   
-  console.log('Server running at http://127.0.0.1:9212/');
+  console.log('Server running at http://127.0.0.1:' + opts['port'] + '/');
   started = true;
 });

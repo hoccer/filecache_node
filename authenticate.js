@@ -33,16 +33,16 @@ http.IncomingMessage.prototype.stopBuffering = function() {
 
   setTimeout(function(array) {
     return function() {
-      that.removeListeners('data', this._onData);
-      that.removeListeners('end', this._onEnd);
+      that.removeListeners('data', that._onData);
+      that.removeListeners('end', that._onEnd);
       
       for (var i = 0; i < array.length; i++) {
         that.emit.apply(that, array[i]);
       }
     }    
   }(this._eventBuffer), 20);
-
-  this._eventBuffer = null;
+  
+  that._eventBuffer = null;
 }
 
 exports.authenticate = function(whitelist) {

@@ -34,7 +34,7 @@ http.IncomingMessage.prototype.stopBuffering = function() {
         that.emit.apply(that, array[i]);
       }
     }    
-  }(this._eventBuffer), 20);
+  }(this._eventBuffer), 1);
 
   this._eventBuffer = null;
 }

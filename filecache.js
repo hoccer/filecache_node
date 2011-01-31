@@ -55,6 +55,7 @@ var saveToFile = function(req, res, next) {
   });
 
   req.on('end', function() {
+    
     ended = true;
     if (dataStream) {
       endHeader(); return;

@@ -31,18 +31,18 @@ http.IncomingMessage.prototype.startBuffering = function() {
 http.IncomingMessage.prototype.stopBuffering = function() {
   that = this;
 
-  setTimeout(function(array) {
+  setTimeout(function() {
     return function() {
       that.removeListeners('data', that._onData);
       that.removeListeners('end', that._onEnd);
       
-      for (var i = 0; i < array.length; i++) {
-        that.emit.apply(that, array[i]);
+      for (var i = 0; i < that._eventBuffer.length; i++) {
+        that.emit.apply(that, that._eventBuffer[i]);
       }
+      
+      that._eventBuffer = null;
     }    
-  }(this._eventBuffer), 20);
-  
-  that._eventBuffer = null;
+  }(), 20);
 }
 
 exports.authenticate = function(whitelist) {

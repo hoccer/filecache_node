@@ -16,7 +16,7 @@ console.log(opts, opts.args);
 
 var saveToFile = function(req, res, next) {
   var dataStream, ended = false;
-  var buffer = "";
+  var buffer = [];
   var uuid = req.params.uuid;
   
   var endHeader = function() {
@@ -39,8 +39,10 @@ var saveToFile = function(req, res, next) {
     console.log("create file " + path);
     
     dataStream = fs.createWriteStream(path + uuid);
-    dataStream.write(buffer);
-    
+    for (var i = 0; i < buffer.length; i++) {
+        dataStream.write(buffer[i]);
+    }
+
     if (ended) {
       endHeader(); return;
     }
@@ -50,7 +52,7 @@ var saveToFile = function(req, res, next) {
     if (dataStream) {
       dataStream.write(chunk);
     } else {
-      buffer = chunk;
+      buffer.push(chunk);
     }
   });
 

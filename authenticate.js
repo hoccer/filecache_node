@@ -33,8 +33,8 @@ http.IncomingMessage.prototype.stopBuffering = function() {
 
   setTimeout(function() {
     return function() {
-      that.removeListeners('data', that._onData);
-      that.removeListeners('end', that._onEnd);
+      that.removeListener('data', that._onData);
+      that.removeListener('end', that._onEnd);
       
       for (var i = 0; i < that._eventBuffer.length; i++) {
         that.emit.apply(that, that._eventBuffer[i]);

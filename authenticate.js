@@ -56,6 +56,8 @@ exports.authenticate = function(whitelist) {
       console.log("reject: " + message)
       
       req.authenticated = false;
+      req.errorMessage = message;
+      
       var options = {"expires_at": new Date().getTime() / 1000 };
       files.save(req.params.uuid, options, function(err) {});
     }

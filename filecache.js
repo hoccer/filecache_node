@@ -23,7 +23,7 @@ var saveToFile = function(req, res, next) {
     var response = function() {
       if (req.authenticated === false) {
         res.writeHead(401);
-        res.end(message || "authentification failed");
+        res.end(req.errorMessage || "authentification failed");
       } else if (req.authenticated === true){
         var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
         res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': response.length});

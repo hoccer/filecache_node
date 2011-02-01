@@ -52,8 +52,8 @@ File.prototype.streamTo = function(res) {
   });
   
 
-  var sendChunkBeginning = function() {
-    var readStream = fs.createReadStream(that.path);
+  var sendChunkBeginning = function(bytes) {
+    var readStream = fs.createReadStream(that.path, {'start': bytes});
 
     readStream.on('data', function(data) {
       that.sentBytes += data.length;  

@@ -54,9 +54,16 @@ File.prototype.streamTo = function(res) {
     'Content-Length': that.options['size']
   });
   
+  
+  var readStream;
   var sendChunkBeginning = function(bytes) {
-    sys.log("sending beginning with " + bytes);
-    var readStream = fs.createReadStream(that.path, { start: bytes, end: that.options.size });
+    sys.log("sending from " + bytes);
+    if (readStream !== undefined && readStream.!readable) {
+      sys.log("still running");
+      return;
+    }
+    
+    readStream = fs.createReadStream(that.path, { start: bytes, end: that.options.size });
     
     readStream.on('data', function(data) {
       that.sentBytes += data.length;  
@@ -64,7 +71,6 @@ File.prototype.streamTo = function(res) {
     });
 
     readStream.on('end', function() {
-      sys.log("readStream end " + that.sentBytes + " " + that.options.size);
       if (that.sentBytes >= that.options.size) {
         res.end();
         fs.unwatchFile(that.path);

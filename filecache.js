@@ -88,7 +88,9 @@ function fileCache(app) {
   app.options('/v3/:uuid', options);
 }
 
+process.chdir(__dirname);
 var started = false;
+
 files = nStore.new('data/files', function() {
   if (started) {return;}
   

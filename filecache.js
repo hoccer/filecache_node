@@ -19,6 +19,7 @@ var saveToFile = function(req, res, next) {
   
   var endHeader = function() {
       dataStream.end();
+      next();
   }
     
   utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {
@@ -43,14 +44,11 @@ var saveToFile = function(req, res, next) {
   });
 
   req.on('end', function() {
-    
     ended = true;
     if (dataStream) {
       endHeader(); return;
     } 
   });  
-  
-  next();
 }
 
 var loadFile = function(req, res, next) {

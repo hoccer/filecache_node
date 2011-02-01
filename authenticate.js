@@ -47,13 +47,13 @@ http.IncomingMessage.prototype.stopBuffering = function() {
 
 exports.authenticate = function(whitelist) {
   var db = new mongo.Db('hoccer_development', new mongo.Server("127.0.0.1", 27017));
-  db.open(function(){ console.log("open") });
+  db.open(function(){ sys.debug("open") });
   
   return function(req, res, next) {    
-    console.log("authenticate");
+    sys.debug("authenticate");
     
     var reject = function(message) {
-      console.log("reject: " + message)
+      sys.debug("reject: " + message)
       
       req.authenticated = false;
       req.errorMessage = message;
@@ -83,7 +83,7 @@ exports.authenticate = function(whitelist) {
       reject("missing api key"); return;
     }
     var api_key = decodeURIComponent(apiResult[1].toString());
-    console.log("api_key " + api_key);
+    sys.debug("api_key " + api_key);
     
     db.collection('accounts', function(err, collection) {
       collection.findOne({"api_key": api_key}, {}, function(err, account) {
@@ -107,7 +107,7 @@ exports.authenticate = function(whitelist) {
                                        .update(req.headers["x-forwarded-proto"] + "://" + req.headers.host + url_without_signature)
                                        .digest('base64');
 
-            console.log(calculated_hash + " - " + signature);
+            sys.debug(calculated_hash + " - " + signature);
             if (signature != calculated_hash)  {
               reject(); return;
             }

@@ -43,6 +43,8 @@ File.prototype.doesExists = function() {
 
 File.prototype.streamTo = function(res) {
   var that = this;
+  that.sentBytes = 0;  
+  
   if (!that.exists) throw new Error("File " + that.path + " does not exists");
 
   res.writeHead(200, {
@@ -54,7 +56,6 @@ File.prototype.streamTo = function(res) {
 
   var sendChunkBeginning = function(bytes) {
     var readStream = fs.createReadStream(that.path, { start: bytes, end: that.options.size });
-    
 
     readStream.on('data', function(data) {
       console.log("readStream data " + that.sentBytes + " " + that.options.size);

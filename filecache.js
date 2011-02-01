@@ -11,8 +11,6 @@ var       auth = require('./authenticate'),
          utils = require('./utils');
          
 var opts = require('tav').set();
-console.log(opts, opts.args);
-
 
 var saveToFile = function(req, res, next) {
   var dataStream, ended = false;
@@ -21,9 +19,6 @@ var saveToFile = function(req, res, next) {
   
   var endHeader = function() {
       dataStream.end();
-      var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
-      res.writeHead(201, {'Content-Type': 'text/plain', "Content-Length": response.length});
-      res.end(response);
   }
   
   var options = { 
@@ -63,6 +58,8 @@ var saveToFile = function(req, res, next) {
       endHeader(); return;
     } 
   });  
+  
+  next();
 }
 
 var loadFile = function(req, res, next) {
@@ -102,8 +99,8 @@ var files = nStore.new('data/files', function() {
   
   connect.createServer(
     connect.logger(),
-    auth.authenticate({methods: 'GET'}),
-    connect.router(fileCache)
+    connect.router(fileCache),
+    auth.authenticate({methods: 'GET'})
   ).listen(opts["port"]);
   
   console.log('Server running at http://127.0.0.1:' + opts['port'] + '/');

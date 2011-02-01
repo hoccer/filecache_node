@@ -24,8 +24,8 @@ http.IncomingMessage.prototype.startBuffering = function() {
     this._eventBuffer.push(['end'].concat(toArray(arguments)));
   }
   
-  this.on('data', this._onData);
-  this.on('end', this._onEnd);  
+  this.addListener('data', this._onData);
+  this.addListener('end', this._onEnd);  
 }
 
 http.IncomingMessage.prototype.stopBuffering = function() {
@@ -49,22 +49,27 @@ exports.authenticate = function(whitelist) {
   var db = new mongo.Db('hoccer_development', new mongo.Server("127.0.0.1", 27017));
   db.open(function(){ console.log("open") });
   
-  return function(req, res, next) {
-    console.log(req);
+  return function(req, res, next) {    
+    console.log("authenticate");
     
     var reject = function(message) {
       console.log("reject: " + message)
       res.writeHead(401);
       res.end(message || "authentification failed");
+      req.connection.destroy();
+    }
+  
+    var accept = function() {
+        var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
+        res.writeHead(201, {'Content-Type': 'text/plain', "Content-Length": response.length});
+        res.end(response);
     }
   
     if (whitelist && whitelist['methods'] && whitelist['methods'].indexOf(req.method) != -1) {
-      next();
+      accept();
       return;
     }
-  
-    req.startBuffering();
-    
+        
     var apiResult = req.url.match(/api_key\=([a-z0-9]+)($|\&.+$)/);
     if (!apiResult || apiResult.length < 1) {
       reject("missing api key"); return;
@@ -99,9 +104,7 @@ exports.authenticate = function(whitelist) {
               reject(); return;
             }
           }
-          
-          req.stopBuffering();
-          next();
+          accept();
         }
       });
     });

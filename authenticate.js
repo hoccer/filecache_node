@@ -1,5 +1,6 @@
 var mongo = require('mongodb'),
    crypto = require('crypto'),
+   sys = require('sys'),
    http = require('http');
   
 function toArray(obj) {

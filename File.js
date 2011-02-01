@@ -55,11 +55,10 @@ File.prototype.streamTo = function(res) {
   });
   
   var sendChunkBeginning = function(bytes) {
+    sys.log("sending beginning with " + bytes);
     var readStream = fs.createReadStream(that.path, { start: bytes, end: that.options.size });
     
     readStream.on('data', function(data) {
-      sys.log("readStream data " + that.sentBytes + " to " + + " " + that.options.size);
-      
       that.sentBytes += data.length;  
       res.write(data)
     });

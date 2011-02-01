@@ -56,7 +56,7 @@ File.prototype.streamTo = function(res) {
     var readStream = fs.createReadStream(that.path);
 
     readStream.on('data', function(data) {
-      that.sentBytes = data.length;  
+      that.sentBytes += data.length;  
       res.write(data)
     });
 

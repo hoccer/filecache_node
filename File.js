@@ -54,13 +54,17 @@ File.prototype.streamTo = function(res) {
 
   var sendChunkBeginning = function(bytes) {
     var readStream = fs.createReadStream(that.path, { start: bytes, end: that.options.size });
+    
 
     readStream.on('data', function(data) {
+      console.log("readStream data " + that.sentBytes + " " + that.options.size);
+      
       that.sentBytes += data.length;  
       res.write(data)
     });
 
     readStream.on('end', function() {
+      console.log("readStream end " + that.sentBytes + " " + that.options.size);
       if (that.sentBytes >= that.options.size) {
         res.end();
         fs.unwatchFile(that.path);

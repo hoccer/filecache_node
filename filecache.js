@@ -94,8 +94,8 @@ files = nStore.new('data/files', function() {
   
   connect.createServer(
     connect.logger(),
-    connect.router(fileCache),
-    auth.authenticate({methods: 'GET'})
+    connect.router(fileCache)
+//    auth.authenticate({methods: 'GET'})
   ).listen(opts["port"]);
   
   console.log('Server running at http://127.0.0.1:' + opts['port'] + '/');

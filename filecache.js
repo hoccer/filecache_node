@@ -13,6 +13,7 @@ var       auth = require('./authenticate'),
 var opts = require('tav').set();
 
 var saveToFile = function(req, res, next) {
+  console.log("saving to file");
   var dataStream, ended = false;
   var buffer = [];
   var uuid = req.params.uuid;
@@ -68,12 +69,15 @@ var saveToFile = function(req, res, next) {
 }
 
 var loadFile = function(req, res, next) {
+  console.log("loading file");
   var file = new fileReader.File(req.params.uuid, files);
   file.on('ready', function(_file) {
     if (!_file.doesExists()) {
+      console.log("file does not exists");
       res.writeHead(404);
       res.end("file not found");
     } else if (_file.expired()) {
+      console.log("file expired");
       res.writeHead(404);
       res.end("file expired");
     } else {

@@ -18,6 +18,7 @@ var File = function(uuid, store) {
   }
   
   fs.stat(path, function(err, data) {
+    console.log(path + " exists");
     that.exists = !err;
     that.stat = data;
     

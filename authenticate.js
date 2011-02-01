@@ -72,7 +72,7 @@ exports.authenticate = function(whitelist) {
           "content-disposition": req.headers['content-disposition']
         };
 
-        files.save(req.params.uuid, options, function(err) {});
+        files.save(req.params. uuid, options, function(err) {});
     }
   
     if (whitelist && whitelist['methods'] && whitelist['methods'].indexOf(req.method) != -1) {

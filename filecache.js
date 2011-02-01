@@ -109,7 +109,7 @@ files = nStore.new('data/files', function() {
   if (started) {return;}
   
   connect.createServer(
-//    connect.logger(),
+    connect.logger(),
     connect.router(fileCache),
     auth.authenticate({methods: 'GET'})
   ).listen(opts["port"]);

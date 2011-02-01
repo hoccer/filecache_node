@@ -25,8 +25,20 @@ var saveToFile = function(req, res, next) {
       res.end(response);
   }
   
+  var options = { 
+    "expires_at": new Date().getTime() / 1000 + (parseInt(req.params["expires_in"]) || 120),
+    "size": parseInt(req.headers["content-length"]),
+    "type": req.headers["content-type"],
+    "content-disposition": req.headers['content-disposition']
+  };
+
+  files.save(req.params.uuid, options, function(err) {});
+  
   utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {
     console.log("create file " + path);
+    
+    
+    
     
     dataStream = fs.createWriteStream(path + uuid);
     for (var i = 0; i < buffer.length; i++) {

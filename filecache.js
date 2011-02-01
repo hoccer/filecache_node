@@ -18,8 +18,22 @@ var saveToFile = function(req, res, next) {
   var uuid = req.params.uuid;
   
   var endHeader = function() {
-      dataStream.end();
-      next();
+    dataStream.end();
+    
+    var response = function() {
+      if (req.authenticated === false) {
+        res.writeHead(401);
+        res.end(message || "authentification failed");
+      } else if (req.authenticated === true){
+        var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
+        res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': response.length});
+        res.end(response);
+      } else {
+        setTimeout(response, 300);
+      }
+    }
+    
+    response();
   }
     
   utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {
@@ -49,6 +63,8 @@ var saveToFile = function(req, res, next) {
       endHeader(); return;
     } 
   });  
+  
+  next();
 }
 
 var loadFile = function(req, res, next) {

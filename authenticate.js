@@ -54,18 +54,14 @@ exports.authenticate = function(whitelist) {
     
     var reject = function(message) {
       console.log("reject: " + message)
-      res.writeHead(401);
-      res.end(message || "authentification failed");
       
+      req.authenticated = false;
       var options = {"expires_at": new Date().getTime() / 1000 };
       files.save(req.params.uuid, options, function(err) {});
     }
   
-    var accept = function() {
-        var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
-        res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': response.length});
-        res.end(response);
-        
+    var accept = function() {        
+        req.authenticated = true;
         var options = { 
           "expires_at": new Date().getTime() / 1000 + (parseInt(req.params["expires_in"]) || 120),
           "size": parseInt(req.headers["content-length"]),

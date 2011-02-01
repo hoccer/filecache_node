@@ -13,7 +13,7 @@ var       auth = require('./authenticate'),
 var opts = require('tav').set();
 
 var saveToFile = function(req, res, next) {
-  sys.debug("saving to file");
+  sys.log("saving to file");
   var dataStream, ended = false;
   var buffer = [];
   var uuid = req.params.uuid;
@@ -38,7 +38,7 @@ var saveToFile = function(req, res, next) {
   }
     
   utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {
-    sys.debug("create file " + path);
+    sys.log("create file " + path);
     
     dataStream = fs.createWriteStream(path + uuid);
     for (var i = 0; i < buffer.length; i++) {
@@ -69,15 +69,15 @@ var saveToFile = function(req, res, next) {
 }
 
 var loadFile = function(req, res, next) {
-  sys.debug("loading file");
+  sys.log("loading file");
   var file = new fileReader.File(req.params.uuid, files);
   file.on('ready', function(_file) {
     if (!_file.doesExists()) {
-      sys.debug("file does not exists");
+      sys.log("file does not exists");
       res.writeHead(404);
       res.end("file not found");
     } else if (_file.expired()) {
-      sys.debug("file expired");
+      sys.log("file expired");
       res.writeHead(404);
       res.end("file expired");
     } else {
@@ -114,6 +114,6 @@ files = nStore.new('data/files', function() {
     auth.authenticate({methods: 'GET'})
   ).listen(opts["port"]);
   
-  sys.debug('Server running at http://127.0.0.1:' + opts['port'] + '/');
+  sys.log('Server running at http://127.0.0.1:' + opts['port'] + '/');
   started = true;
 });

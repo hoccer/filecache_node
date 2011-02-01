@@ -18,7 +18,7 @@ var File = function(uuid, store) {
   }
   
   fs.stat(path, function(err, data) {
-    sys.debug(path);
+    sys.log(path);
     that.exists = !err;
     that.stat = data;
     
@@ -59,14 +59,14 @@ File.prototype.streamTo = function(res) {
     var readStream = fs.createReadStream(that.path, { start: bytes, end: that.options.size });
 
     readStream.on('data', function(data) {
-      sys.debug("readStream data " + that.sentBytes + " " + that.options.size);
+      sys.log("readStream data " + that.sentBytes + " " + that.options.size);
       
       that.sentBytes += data.length;  
       res.write(data)
     });
 
     readStream.on('end', function() {
-      sys.debug("readStream end " + that.sentBytes + " " + that.options.size);
+      sys.log("readStream end " + that.sentBytes + " " + that.options.size);
       if (that.sentBytes >= that.options.size) {
         res.end();
         fs.unwatchFile(that.path);

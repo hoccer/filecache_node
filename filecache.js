@@ -19,16 +19,11 @@ var saveToFile = function(req, res, next) {
   
   var endHeader = function() {
       dataStream.end();
+      
+      // var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
+      // res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': response.length});
+      // res.end(response);
   }
-  
-  var options = { 
-    "expires_at": new Date().getTime() / 1000 + (parseInt(req.params["expires_in"]) || 120),
-    "size": parseInt(req.headers["content-length"]),
-    "type": req.headers["content-type"],
-    "content-disposition": req.headers['content-disposition']
-  };
-  
-  files.save(uuid, options, function(err) {});
   
   utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {
     console.log("create file " + path);
@@ -94,7 +89,7 @@ function fileCache(app) {
 }
 
 var started = false;
-var files = nStore.new('data/files', function() {
+files = nStore.new('data/files', function() {
   if (started) {return;}
   
   connect.createServer(

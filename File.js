@@ -57,9 +57,7 @@ File.prototype.streamTo = function(res) {
   
   var readStream;
   var sendChunkBeginning = function(bytes) {
-    sys.log("sending from " + bytes);
     if (readStream !== undefined && readStream.readable) {
-      sys.log("still running");
       return;
     }
     

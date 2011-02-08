@@ -12,40 +12,6 @@ function toArray(obj) {
   return arr;
 }
 
-
-
-http.IncomingMessage.prototype.startBuffering = function() {
-  this._eventBuffer = [];
-  
-  this._onData = function() {
-    this._eventBuffer.push(['data'].concat(toArray(arguments)));
-  };
-  
-  this._onEnd = function() {
-    this._eventBuffer.push(['end'].concat(toArray(arguments)));
-  }
-  
-  this.addListener('data', this._onData);
-  this.addListener('end', this._onEnd);  
-}
-
-http.IncomingMessage.prototype.stopBuffering = function() {
-  that = this;
-
-  setTimeout(function() {
-    return function() {
-      that.removeListener('data', that._onData);
-      that.removeListener('end', that._onEnd);
-      
-      for (var i = 0; i < that._eventBuffer.length; i++) {
-        that.emit.apply(that, that._eventBuffer[i]);
-      }
-      
-      that._eventBuffer = null;
-    }    
-  }(), 20);
-}
-
 exports.authenticate = function(whitelist) {
   var db = new mongo.Db('hoccer_accounts', new mongo.Server("127.0.0.1", 27017));
   db.open(function(){ sys.log("open") });

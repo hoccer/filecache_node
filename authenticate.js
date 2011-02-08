@@ -15,15 +15,12 @@ function toArray(obj) {
 
 exports.authenticate = function(whitelist) {
   var db = new mongo.Db('hoccer_development', new mongo.Server("127.0.0.1", 27017));
-  db.open(function(){ sys.log("open") });
+  db.open();
   
   return function(req, res, next) {    
-    sys.log("authenticate");
     var params = url.parse(req.url, true).query || {};
     
-    var reject = function(message) {
-      sys.log("reject: " + message)
-      
+    var reject = function(message) {      
       req.authenticated = false;
       req.errorMessage = message;
       
@@ -50,7 +47,6 @@ exports.authenticate = function(whitelist) {
     if (params['api_key'] === undefined) {
       reject("missing api key"); return;
     }
-    sys.log("api_key " + params['api_key']);
     
     db.collection('accounts', function(err, collection) {
       collection.findOne({"api_key": params['api_key']}, {}, function(err, account) {
@@ -71,7 +67,6 @@ exports.authenticate = function(whitelist) {
                                        .update(req.headers["x-forwarded-proto"] + "://" + req.headers.host + url_without_signature)
                                        .digest('base64');
 
-            sys.log(calculated_hash + " - " + params['signature']);
             if (params['signature'] != calculated_hash)  {
               reject(); return;
             }

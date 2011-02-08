@@ -13,7 +13,6 @@ var       auth = require('./authenticate'),
 var opts = require('tav').set();
 
 var saveToFile = function(req, res, next) {
-  sys.log("saving to file");
   var dataStream, ended = false;
   var buffer = [];
   var uuid = req.params.uuid;
@@ -28,9 +27,7 @@ var saveToFile = function(req, res, next) {
       } else if (req.authenticated === true){
         var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
         res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': response.length});
-        res.end(response);
-        sys.log("authenticated: " + response);
-        
+        res.end(response);        
       } else {
         setTimeout(response, 300);
       }
@@ -39,9 +36,7 @@ var saveToFile = function(req, res, next) {
     response();
   }
     
-  utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {
-    sys.log("create file " + path);
-    
+  utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {    
     dataStream = fs.createWriteStream(path + uuid);
     for (var i = 0; i < buffer.length; i++) {
         dataStream.write(buffer[i]);
@@ -71,15 +66,12 @@ var saveToFile = function(req, res, next) {
 }
 
 var loadFile = function(req, res, next) {
-  sys.log("loading file");
   var file = new fileReader.File(req.params.uuid, files);
   file.on('ready', function(_file) {
     if (!_file.doesExists()) {
-      sys.log("file does not exists");
       res.writeHead(404);
       res.end("file not found");
     } else if (_file.expired()) {
-      sys.log("file expired");
       res.writeHead(404);
       res.end("file expired");
     } else {

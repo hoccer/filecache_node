@@ -29,6 +29,8 @@ var saveToFile = function(req, res, next) {
         var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
         res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': response.length});
         res.end(response);
+        sys.log("authenticated: " + response);
+        
       } else {
         setTimeout(response, 300);
       }

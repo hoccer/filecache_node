@@ -15,7 +15,7 @@ function toArray(obj) {
 
 exports.authenticate = function(whitelist) {
   var db = new mongo.Db('hoccer_accounts', new mongo.Server("127.0.0.1", 27017));
-  db.open();
+  db.open(function() {});
   
   return function(req, res, next) {    
     var params = url.parse(req.url, true).query || {};

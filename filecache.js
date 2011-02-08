@@ -25,9 +25,9 @@ var saveToFile = function(req, res, next) {
         res.writeHead(401);
         res.end(req.errorMessage || "authentification failed");
       } else if (req.authenticated === true){
-        var response = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
-        res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': response.length});
-        res.end(response);        
+        var responseContent = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
+        res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': responseContent.length});
+        res.end(responseContent);        
       } else {
         setTimeout(response, 300);
       }

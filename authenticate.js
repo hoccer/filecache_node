@@ -26,6 +26,7 @@ exports.authenticate = function(whitelist) {
       
       var options = {"expires_at": new Date().getTime() / 1000 };
       files.save(req.params.uuid, options, function(err) {});
+      next();
     }
   
     var accept = function() {        
@@ -38,6 +39,7 @@ exports.authenticate = function(whitelist) {
         };
 
         files.save(req.params. uuid, options, function(err) {});
+        next();
     }
   
     if (whitelist && whitelist['methods'] && whitelist['methods'].indexOf(req.method) != -1) {

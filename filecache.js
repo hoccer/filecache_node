@@ -87,6 +87,7 @@ var loadFile = function(req, res, next) {
 }
 
 var options = function(req, res, next) {
+  console.log(req);
   res.writeHead(200, {
     "Access-Control-Allow-Origin": req.headers["Origin"],    
     "Access-Control-Allow-Methods": "PUT",

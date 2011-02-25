@@ -26,7 +26,13 @@ var saveToFile = function(req, res, next) {
         res.end(req.errorMessage || "authentification failed");
       } else if (req.authenticated === true){
         var responseContent = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
-        res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': responseContent.length});
+        res.writeHead(201, {
+          'Content-Type': 'text/plain',
+          'Content-Length': responseContent.length, 
+          "Access-Control-Allow-Origin": req.headers["Origin"],
+          "Access-Control-Allow-Methods": "PUT",
+          "Access-Control-Allow-Headers": "X-Requested-With, X-File-Name, Content-Type, Content-Disposition",
+        });
         res.end(responseContent);        
       } else {
         setTimeout(response, 300);

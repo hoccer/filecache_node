@@ -82,7 +82,7 @@ var loadFile = function(req, res, next) {
 
 var options = function(req, res, next) {
   res.writeHead(200, {
-    "Access-Control-Allow-Origin": req.headers["origin"],    
+    "Access-Control-Allow-Origin": req.headers["Origin"],    
     "Access-Control-Allow-Methods": "PUT",
     "Access-Control-Allow-Headers": "X-Requested-With, X-File-Name, Content-Type, Content-Disposition",
     "Content-Length": "0"

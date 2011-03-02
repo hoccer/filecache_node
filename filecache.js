@@ -3,7 +3,7 @@ var http = require('http'),
     url = require('url'),
     sys = require('sys');
     
-var nStore = require('nstore'),
+var dirty = require('dirty'),
     connect = require('connect');
     
 var       auth = require('./authenticate'),
@@ -106,15 +106,12 @@ function fileCache(app) {
 process.chdir(__dirname);
 var started = false;
 
-files = nStore.new('data/files', function() {
-  if (started) {return;}
+files = dirty('data/dirty');
+
+connect.createServer(
+  connect.logger(),
+  connect.router(fileCache),
+  auth.authenticate({methods: 'GET'})
+).listen(opts["port"]);
   
-  connect.createServer(
-    connect.logger(),
-    connect.router(fileCache),
-    auth.authenticate({methods: 'GET'})
-  ).listen(opts["port"]);
-  
-  sys.log('Server running at http://127.0.0.1:' + opts['port'] + '/');
-  started = true;
-});
+sys.log('Server running at http://127.0.0.1:' + opts['port'] + '/');

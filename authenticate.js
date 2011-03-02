@@ -25,7 +25,7 @@ exports.authenticate = function(whitelist) {
       req.errorMessage = message;
       
       var options = {"expires_at": new Date().getTime() / 1000 };
-      files.save(req.params.uuid, options, function(err) {});
+      files.set(req.params.uuid, options);
     }
   
     var accept = function() {        
@@ -37,9 +37,12 @@ exports.authenticate = function(whitelist) {
           "content-disposition": req.headers['content-disposition']
         };
 
-        files.save(req.params. uuid, options, function(err) {});
+        files.set(req.params.uuid, options);
     }
-  
+    
+    accept();
+    return;
+    
     if (whitelist && whitelist['methods'] && whitelist['methods'].indexOf(req.method) != -1) {
       return;
     }

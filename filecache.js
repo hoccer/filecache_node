@@ -8,6 +8,7 @@ fileReader = require('lib/file_reader'),
 var opts = require('tav').set();
 
 var saveToFile = function(req, res, next) {
+  console.log((parseInt(req.params["expires_in"]));
   var endHeader = function() {  
     if (req.authenticated === false) {
       var options = {"expires_at": new Date().getTime() / 1000 };

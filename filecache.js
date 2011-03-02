@@ -1,16 +1,9 @@
-var http = require('http'),
-    fs = require('fs'),
-    url = require('url'),
-    sys = require('sys'),
-    events = require('events');
-    
-var dirty = require('dirty'),
-    connect = require('connect');
-    
-var       auth = require('./authenticate'),
-    fileReader = require('lib/file_reader'),
-         utils = require('lib/utils'),
-    paperclip = require('lib/paperclip');
+var  dirty = require('dirty'),
+   connect = require('connect');
+      auth = require('./authenticate'),
+fileReader = require('lib/file_reader'),
+ paperclip = require('lib/paperclip'),
+     utils = require('lib/utils'),
          
 var opts = require('tav').set();
 
@@ -94,4 +87,4 @@ connect.createServer(
   connect.router(fileCache)
 ).listen(opts["port"]);
   
-sys.log('Server running at http://127.0.0.1:' + opts['port'] + '/');
+console.log('Server running at http://127.0.0.1:' + opts['port'] + '/');

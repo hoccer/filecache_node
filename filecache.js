@@ -8,8 +8,9 @@ var dirty = require('dirty'),
     connect = require('connect');
     
 var       auth = require('./authenticate'),
-    fileReader = require('./File'),
-         utils = require('./utils');
+    fileReader = require('lib/file_reader'),
+         utils = require('lib/utils'),
+    paperclip = require('lib/paperclip');
          
 var opts = require('tav').set();
 
@@ -75,75 +76,6 @@ var options = function(req, res, next) {
   res.end();
 }
 
-
-var FileWriter = function(uuid, req) {
-  var that = this;
-
-  var dataStream, ended = false;
-  var buffer = [];
-
-  events.EventEmitter.call(this);
-    
-  var ready = function() {
-    dataStream.end();
-    
-    that.isReady = true;
-    that.emit('ready');
-  }
-  
-  utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {    
-    dataStream = fs.createWriteStream(path + uuid);
-    for (var i = 0; i < buffer.length; i++) {
-        dataStream.write(buffer[i]);
-    }
-
-    if (ended) {
-      ready(); return;
-    }
-  });
-  
-  req.on('data', function(chunk) {
-    if (dataStream) {
-      dataStream.write(chunk);
-    } else {
-      buffer.push(chunk);
-    }
-  });
-
-  req.on('end', function() {
-    console.log("writen");
-    ended = true;
-    if (dataStream) {
-      ready(); return;
-    } 
-  });    
-}
-
-sys.inherits(FileWriter, events.EventEmitter);
-
-var paperclip = function() {
-  return function(req, res, next) {
-    if (req.method !== 'PUT') {
-      console.log(req.method + " not saving"); 
-      next();
-      return;
-      
-    }
-    
-    var uuidRegexp = req.url.match(/\/v3\/(.{36})/);
-    if (!uuidRegexp) {
-      console.log("no uuid"); 
-      next();
-      return;
-    }
-    
-    var uuid = uuidRegexp[1];
-    req.file = new FileWriter(uuid, req);
-
-    next();
-  }
-}
-
 function fileCache(app) {
   app.get('/v3/:uuid', loadFile);
   app.put('/v3/:uuid', saveToFile);
@@ -157,7 +89,7 @@ files = dirty('data/dirty');
 
 connect.createServer(
   connect.logger(),
-  paperclip(),
+  paperclip.clip(),
   auth.authenticate({methods: 'GET'}),
   connect.router(fileCache)
 ).listen(opts["port"]);

@@ -24,11 +24,11 @@ var File = function(uuid, store) {
     isReady();
   });
   
-  store.get(uuid, function(err, doc, meta) {
-    that.options = doc || err;
-    
-    isReady();
-  });
+  
+  
+  that.options = store.get(uuid) || new Error();
+  console.log(that.options);
+  isReady();
 }
 
 sys.inherits(File, events.EventEmitter);

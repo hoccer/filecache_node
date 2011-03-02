@@ -4,7 +4,7 @@ var http = require('http'),
     sys = require('sys'),
     events = require('events');
     
-var nStore = require('nstore'),
+var dirty = require('dirty'),
     connect = require('connect');
     
 var       auth = require('./authenticate'),
@@ -16,10 +16,23 @@ var opts = require('tav').set();
 var saveToFile = function(req, res, next) {
   var endHeader = function() {  
     if (req.authenticated === false) {
+      var options = {"expires_at": new Date().getTime() / 1000 };
+      files.set(req.params.uuid, options);
+      
       res.writeHead(401);
       res.end(req.errorMessage || "authentification failed");
     } else if (req.authenticated === true){
+      var options = { 
+        "expires_at": new Date().getTime() / 1000 + (parseInt(req.params["expires_in"]) || 120),
+        "size": parseInt(req.headers["content-length"]),
+        "type": req.headers["content-type"],
+        "content-disposition": req.headers['content-disposition']
+      };
+      
+      files.set(req.params.uuid, options);
+      
       var responseContent = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
+      
       res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': responseContent.length});
       res.end(responseContent);        
     }
@@ -63,7 +76,7 @@ var options = function(req, res, next) {
 }
 
 
-var FileWriter = function() {
+var FileWriter = function(uuid, req) {
   var that = this;
 
   var dataStream, ended = false;
@@ -75,7 +88,7 @@ var FileWriter = function() {
     dataStream.end();
     
     that.isReady = true;
-    that.fire('ready');
+    that.emit('ready');
   }
   
   utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {    
@@ -98,6 +111,7 @@ var FileWriter = function() {
   });
 
   req.on('end', function() {
+    console.log("writen");
     ended = true;
     if (dataStream) {
       ready(); return;
@@ -110,17 +124,22 @@ sys.inherits(FileWriter, events.EventEmitter);
 var paperclip = function() {
   return function(req, res, next) {
     if (req.method !== 'PUT') {
-      console.log(req.method + " not saving"); return;
+      console.log(req.method + " not saving"); 
+      next();
+      return;
+      
     }
     
     var uuidRegexp = req.url.match(/\/v3\/(.{36})/);
     if (!uuidRegexp) {
-      console.log("no uuid"); return;
+      console.log("no uuid"); 
+      next();
+      return;
     }
     
     var uuid = uuidRegexp[1];
-    req.file = new FileWriter(uuid);
-    
+    req.file = new FileWriter(uuid, req);
+
     next();
   }
 }
@@ -134,16 +153,13 @@ function fileCache(app) {
 process.chdir(__dirname);
 var started = false;
 
-files = nStore.new('data/files', function() {
-  if (started) {return;}
+files = dirty('data/dirty');
+
+connect.createServer(
+  connect.logger(),
+  paperclip(),
+  auth.authenticate({methods: 'GET'}),
+  connect.router(fileCache)
+).listen(opts["port"]);
   
-  connect.createServer(
-    connect.logger(),
-    paperclip(),
-    auth.authenticate({methods: 'GET'}),
-    connect.router(fileCache)
-  ).listen(opts["port"]);
-  
-  sys.log('Server running at http://127.0.0.1:' + opts['port'] + '/');
-  started = true;
-});
+sys.log('Server running at http://127.0.0.1:' + opts['port'] + '/');

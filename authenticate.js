@@ -24,24 +24,18 @@ exports.authenticate = function(whitelist) {
       req.authenticated = false;
       req.errorMessage = message;
       
-      var options = {"expires_at": new Date().getTime() / 1000 };
-      files.save(req.params.uuid, options, function(err) {});
       next();
     }
   
     var accept = function() {        
         req.authenticated = true;
-        var options = { 
-          "expires_at": new Date().getTime() / 1000 + (parseInt(params["expires_in"]) || 120),
-          "size": parseInt(req.headers["content-length"]),
-          "type": req.headers["content-type"],
-          "content-disposition": req.headers['content-disposition']
-        };
 
-        files.save(req.params. uuid, options, function(err) {});
         next();
     }
-  
+    
+    accept();
+    return;
+    
     if (whitelist && whitelist['methods'] && whitelist['methods'].indexOf(req.method) != -1) {
       return;
     }

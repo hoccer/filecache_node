@@ -18,20 +18,16 @@ exports.authenticate = function(whitelist) {
   db.open(function() {});
   
   return function(req, res, next) {    
-    var params = url.parse(req.url, true).query || {};
-    
-    var reject = function(message) {      
-      req.authenticated = false;
-      req.errorMessage = message;
-      
-      next();
-    }
-  
-    var accept = function() {        
-        req.authenticated = true;
-
+    var params = url.parse(req.url, true).query || {},
+      reject = function(message) {      
+        req.authenticated = false;
+        req.errorMessage = message;
         next();
-    }
+      },
+      accept = function() {        
+        req.authenticated = true;
+        next();
+      }
     
     accept();
     return;

@@ -11,13 +11,11 @@ fileReader = require('lib/file_reader'),
 var opts = require('tav').set();
 
 var saveToFile = function(req, res, next) {
-
   
   var endHeader = function() {  
     var params = (qs.parse(url.parse(req.url).query)),
-        expires_in = params["expires_in"];
-        
-    console.log(expires_in);
+        expires_in = parseInt(params["expires_in"]);
+    
     if (req.authenticated === false) {
       var options = {"expires_at": new Date().getTime() / 1000 };
       files.set(req.params.uuid, options);
@@ -26,8 +24,10 @@ var saveToFile = function(req, res, next) {
       res.writeHead(401);
       res.end(req.errorMessage || "authentification failed");
     } else if (req.authenticated === true){
+      console.log((new Date().getTime() / 1000), expires_in, (new Date().getTime() / 1000) + expires_in);
+      
       var options = { 
-        "expires_at": new Date().getTime() / 1000 + expires_in,
+        "expires_at": (new Date().getTime() / 1000) + expires_in,
         "size": parseInt(req.headers["content-length"]),
         "type": req.headers["content-type"],
         "content-disposition": req.headers['content-disposition']
@@ -42,11 +42,10 @@ var saveToFile = function(req, res, next) {
     
     setTimeout(function() {
       var uuid = req.params.uuid;
-      console.log("remove " + uuid);
       files.rm(uuid);
       utils.inCreatedDirectory(utils.splittedUuid(uuid), function(path) {    
         fs.unlink(path + uuid, function() {
-          console.log("deleted");
+          console.log("deleted" + uuid);
         });
       });
     }, expires_in * 1000);
@@ -70,10 +69,8 @@ var loadFromFile = function(req, res, next) {
   file.on('ready', function(_file) {
     if (!_file.doesExists()) {
       res.writeHead(404);
-      res.end("file not found");
     } else if (_file.expired()) {
       res.writeHead(404);
-      res.end("file expired");
     } else {
       _file.streamTo(res);
     }
@@ -87,6 +84,7 @@ var options = function(req, res, next) {
     "Access-Control-Allow-Headers": "X-Requested-With, X-File-Name, Content-Type, Content-Disposition",
     "Content-Length": "0"
   });
+  
   res.end();
 }
 
@@ -99,7 +97,7 @@ function fileCache(app) {
 process.chdir(__dirname);
 var started = false;
 
-files = dirty('data/dirty');
+var files = dirty('data/file_cache');
 
 connect.createServer(
   connect.logger(),

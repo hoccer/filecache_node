@@ -3,20 +3,25 @@ var  dirty = require('dirty'),
       auth = require('./authenticate'),
 fileReader = require('lib/file_reader'),
  paperclip = require('lib/paperclip'),
-     utils = require('lib/utils');
-        fs = require('fs')
+     utils = require('lib/utils'),
+        fs = require('fs'),
+       qs = require('querystring'),
+      url = require('url');
          
 var opts = require('tav').set();
 
 var saveToFile = function(req, res, next) {
-  
-  var expires_in = parseInt(req.params["expires_in"]) || 120;
-  console.log("exp " + expires_in)
+
   
   var endHeader = function() {  
+    var params = (qs.parse(url.parse(req.url).query)),
+        expires_in = params["expires_in"];
+        
+    console.log(expires_in);
     if (req.authenticated === false) {
       var options = {"expires_at": new Date().getTime() / 1000 };
       files.set(req.params.uuid, options);
+      expires_in = 0;
       
       res.writeHead(401);
       res.end(req.errorMessage || "authentification failed");
@@ -27,8 +32,8 @@ var saveToFile = function(req, res, next) {
         "type": req.headers["content-type"],
         "content-disposition": req.headers['content-disposition']
       };
-      
       var responseContent = req.headers['x-forwarded-proto'] + '://' + req.headers.host + '/v3/' +  req.params.uuid;
+      
       res.writeHead(201, {'Content-Type': 'text/plain', 'Content-Length': responseContent.length});
       res.end(responseContent);        
     }
@@ -60,7 +65,7 @@ var saveToFile = function(req, res, next) {
   req.file.on('ready', endHeader);
 }
 
-var loadFile = function(req, res, next) {
+var loadFromFile = function(req, res, next) {
   var file = new fileReader.File(req.params.uuid, files);
   file.on('ready', function(_file) {
     if (!_file.doesExists()) {
@@ -86,7 +91,7 @@ var options = function(req, res, next) {
 }
 
 function fileCache(app) {
-  app.get('/v3/:uuid', loadFile);
+  app.get('/v3/:uuid', loadFromFile);
   app.put('/v3/:uuid', saveToFile);
   app.options('/v3/:uuid', options);
 }

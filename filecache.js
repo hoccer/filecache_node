@@ -1,5 +1,6 @@
 var  dirty = require('dirty'),
-   connect = require('connect');
+   connect = require('connect'),
+   express = require('express'),
       auth = require('./authenticate'),
 fileReader = require('./lib/file_reader'),
  paperclip = require('./lib/paperclip'),
@@ -99,11 +100,11 @@ var started = false;
 
 var files = dirty('data/file_cache');
 
-connect.createServer(
+express.createServer(
   connect.logger(),
   paperclip.clip(),
   auth.authenticate({methods: 'GET'}),
-  connect.router(fileCache)
+  express.router(fileCache)
 ).listen(opts["port"]);
 
 console.log('Server running at http://127.0.0.1:' + opts['port'] + '/');

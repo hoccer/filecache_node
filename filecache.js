@@ -6,8 +6,9 @@ fileReader = require('./lib/file_reader'),
  paperclip = require('./lib/paperclip'),
      utils = require('./lib/utils'),
         fs = require('fs'),
-       qs = require('querystring'),
-      url = require('url');
+    daemon = require('daemon'),
+        qs = require('querystring'),
+       url = require('url');
 
 var opts = require('tav').set();
 
@@ -106,6 +107,7 @@ var started = false;
 
 var files = dirty('data/file_cache');
 
+
 var listenPort = opts["port"];
 if(!listenPort) {
     listenPort = 9412;
@@ -118,11 +120,78 @@ if(!listenAddress) {
     console.log('Defaulting address to ' + listenAddress);
 }
 
-express.createServer(
-  connect.logger(),
-  paperclip.clip(),
-  auth.authenticate({methods: 'GET'}),
-  express.router(fileCache)
-).listen(listenPort, listenAddress);
+var pidFile = opts["pid"];
+if(!pidFile) {
+    pidFile = "filecache.pid";
+    console.log('Defaulting pid file to ' + pidFile);
+}
 
-console.log('Server running at http://' + listenAddress + ':' + listenPort + '/');
+var logFile = opts["log"];
+if(!logFile) {
+    logFile = "filecache.log";
+    console.log('Defaulting log file to ' + logFile);
+}
+
+var daemonize = "daemon" in opts;
+
+function banner() {
+    console.log(">>>>>>>>>> Hoccer Filecache <<<<<<<<<<");
+    console.log("Server running at http://" + listenAddress + ":" + listenPort + "/");
+}
+
+function start() {
+
+    console.log("Attempting to start filecache");
+
+    express.createServer(
+        connect.logger(),
+        paperclip.clip(),
+        auth.authenticate({methods: 'GET'}),
+        express.router(fileCache)
+    ).listen(listenPort, listenAddress);
+
+    if(daemonize) {
+        var fileDescriptors = {
+            stdout: logFile, stderr: logFile
+        };
+        function daemonizeDone(err, started) {
+            if(err) {
+                console.log("Error starting daemon: " + err);
+                return;
+            }
+
+            banner();
+        }
+        daemon.daemonize(fileDescriptors, pidFile, daemonizeDone);
+    } else {
+        banner();
+    }
+}
+
+function stop() {
+
+    console.log("Attempting to stop filecache");
+
+    function killDone(err, pid) {
+        if(err) {
+            console.log("Error stopping daemon with pid " + pid + ": " + err);
+        } else {
+            console.log("Stopped daemon with pid " + pid);
+        }
+    }
+
+    daemon.kill(pidFile, killDone);
+}
+
+switch(opts.args[0]) {
+default:
+    daemonize = false;
+    start();
+    break;
+case "start":
+    start();
+    break;
+case "stop":
+    stop();
+    break;
+}

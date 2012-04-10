@@ -11,6 +11,11 @@ fileReader = require('./lib/file_reader'),
 
 var opts = require('tav').set();
 
+var sayHello = function(req, res, next) {
+    res.writeHead(200);
+    res.end('This is the Hoccer filecache.');
+};
+
 var saveToFile = function(req, res, next) {
 
   var endHeader = function() {
@@ -90,6 +95,7 @@ var options = function(req, res, next) {
 }
 
 function fileCache(app) {
+  app.get('/', sayHello);
   app.get('/v3/:uuid', loadFromFile);
   app.put('/v3/:uuid', saveToFile);
   app.options('/v3/:uuid', options);
@@ -100,11 +106,23 @@ var started = false;
 
 var files = dirty('data/file_cache');
 
+var listenPort = opts["port"];
+if(!listenPort) {
+    listenPort = 9412;
+    console.log('Defaulting port to ' + listenPort);
+}
+
+var listenAddress = opts["address"];
+if(!listenAddress) {
+    listenAddress = '127.0.0.1';
+    console.log('Defaulting address to ' + listenAddress);
+}
+
 express.createServer(
   connect.logger(),
   paperclip.clip(),
   auth.authenticate({methods: 'GET'}),
   express.router(fileCache)
-).listen(opts["port"]);
+).listen(listenPort, listenAddress);
 
-console.log('Server running at http://127.0.0.1:' + opts['port'] + '/');
+console.log('Server running at http://' + listenAddress + ':' + listenPort + '/');

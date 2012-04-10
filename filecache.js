@@ -132,7 +132,7 @@ if(!logFile) {
     console.log('Defaulting log file to ' + logFile);
 }
 
-var daemonize = "daemon" in opts;
+var daemonize = false;
 
 function banner() {
     console.log(">>>>>>>>>> Hoccer Filecache <<<<<<<<<<");
@@ -189,9 +189,11 @@ default:
     start();
     break;
 case "start":
+    daemonize = true;
     start();
     break;
 case "stop":
+    daemonize = true;
     stop();
     break;
 }

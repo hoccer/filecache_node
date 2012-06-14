@@ -134,8 +134,14 @@ if(!logFile) {
 
 var daemonize = false;
 
-function banner() {
+function serve() {
     console.log(">>>>>>>>>> Hoccer Filecache <<<<<<<<<<");
+    express.createServer(
+        connect.logger(),
+        paperclip.clip(),
+        auth.authenticate({methods: 'GET'}),
+        express.router(fileCache)
+    ).listen(listenPort, listenAddress);
     console.log("Server running at http://" + listenAddress + ":" + listenPort + "/");
 }
 
@@ -143,13 +149,7 @@ function start() {
 
     console.log("Attempting to start filecache");
 
-    express.createServer(
-        connect.logger(),
-        paperclip.clip(),
-        auth.authenticate({methods: 'GET'}),
-        express.router(fileCache)
-    ).listen(listenPort, listenAddress);
-
+ 
     if(daemonize) {
         var fileDescriptors = {
             stdout: logFile, stderr: logFile
@@ -160,11 +160,11 @@ function start() {
                 return;
             }
 
-            banner();
+            serve();
         }
         daemon.daemonize(fileDescriptors, pidFile, daemonizeDone);
     } else {
-        banner();
+        serve();
     }
 }
 
